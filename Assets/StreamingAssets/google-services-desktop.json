@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "493879953577",
+    "project_id": "csusb-4500-01-firebase",
+    "storage_bucket": "csusb-4500-01-firebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493879953577:android:00812637b3f2dfc51481b8",
+        "android_client_info": {
+          "package_name": "com.DefaultCompany.csusb_4500_firebase_idle_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "493879953577-3s6ek59pbedv7h0lo49o8tfohn0hns1a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCz7W4ZFQhoML0d4g8IuH5mAG7qevcg5Tk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "493879953577-3s6ek59pbedv7h0lo49o8tfohn0hns1a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
