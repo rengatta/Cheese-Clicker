@@ -2,9 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Signup : MonoBehaviour
 {
+    public TextMeshProUGUI username;
+    public TextMeshProUGUI password;
+
     FirebaseAuth auth;
     // Start is called before the first frame update
     void Start()
@@ -12,20 +16,11 @@ public class Signup : MonoBehaviour
         FirebaseInit();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     //https://firebase.google.com/docs/auth/unity/manage-users
     //https://spin.atomicobject.com/2020/06/09/firebase-unity-user-accounts/
     public void FirebaseInit() {
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
-
-
     }
-
-
 
     //https://firebase.google.com/docs/auth/unity/start
     public void SignupButtonClick() {
@@ -50,10 +45,7 @@ public class Signup : MonoBehaviour
             Debug.LogFormat("Firebase user created successfully: {0} ({1})",
                 newUser.DisplayName, newUser.UserId);
         });
-
-
     }
-
 
     public void DeleteUser() {
         Firebase.Auth.FirebaseUser user = auth.CurrentUser;
@@ -77,6 +69,5 @@ public class Signup : MonoBehaviour
 
 
     }
-
 
 }
