@@ -5,36 +5,30 @@ using TMPro;
 public class GameData : MonoBehaviour
 {
 
-
     public float cheese_multiplier = 1f;
-    
-    private int _total_cheese = 0;
-    public int total_cheese   // property
+    public TextMeshProUGUI welcomeText;
+
+    private float _total_cheese = 0;
+    public float total_cheese   
     {
-        get { return _total_cheese; }   // get method
+        get { return _total_cheese; }  
         set {
-        
         _total_cheese = value; 
-        
-        
-        
-        }  // set method
+        }  
     }
 
 
-
-
-
-
-    // Start is called before the first frame update
-    void Start()
+    private string _username = "";
+    public string username 
     {
-        
+        get { return _username; }  
+        set {
+            _username = value;
+            welcomeText.text = "Welcome, " + username;
+        } 
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+
+
 }

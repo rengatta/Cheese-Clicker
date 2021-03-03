@@ -3,21 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
-
-
-
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
     public TextMeshProUGUI welcomeText;
     public GameObject settingsMenu;
-    public SceneField logInMenu;
+    public AudioSource audioSource;
+    public Toggle muteToggle;
 
     void Start()
     {
-        welcomeText.text = "Welcome, " + GlobalHelper.global.email;
-    }
 
+    }
 
     public void ToggleSettingsMenu() {
         if(settingsMenu.activeSelf) {
@@ -29,11 +27,20 @@ public class UIManager : MonoBehaviour
     }
 
     public void LogoutButtonPressed() {
-        GlobalHelper.global.auth.SignOut();
-
+        if(GlobalHelper.global.auth != null) {
+            GlobalHelper.global.auth.SignOut();
+        }
+        
     }
 
+    public void MuteToggleChanged() {
+        if(muteToggle.isOn) {
+            audioSource.Pause();
+        } else {
+            audioSource.UnPause();
+        }
 
+    }
 
 
 }

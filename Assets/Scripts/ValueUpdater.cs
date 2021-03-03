@@ -13,8 +13,8 @@ public class ValueUpdater : MonoBehaviour
 
     IEnumerator CalculateCPS() {
         WaitForSeconds wfs_cps = new WaitForSeconds(1);
-        int prev_cheese = 0;
-        int new_cheese = 0;
+        float prev_cheese = 0;
+        float new_cheese = 0;
         while (true) {
             prev_cheese = gameData.total_cheese;
             yield return wfs_cps;

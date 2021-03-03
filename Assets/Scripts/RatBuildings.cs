@@ -2,59 +2,84 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+[System.Serializable]
 public class RatBuildings : MonoBehaviour
 {
 
-    public TextMeshProUGUI amount_text;
-    public TextMeshProUGUI cost_text;
-    public TextMeshProUGUI unit_cps_text;
-    public TextMeshProUGUI total_cps_text;
-
-
+    
+    public TextMeshProUGUI infoText;
     public GameData gameData;
-
-    public int cheese_cost = 20;
-
-
-    public int cheese_per_second = 10;
-
+    public string buildingName = "";
+    public float baseCheeseCost = 20;
+    public float cheeseCost = 20;
+    public float cheesePerSecond = 10;
     [HideInInspector]
-    public int total_cheese_per_second = 0;
-
+    public float totalCheesePerSecond = 0;
     [HideInInspector]
     public int amount = 0;
 
-    private void Start()
-    {
+    public float CalculateCost(int buyAmount) {
+
+        float totalCost = 0f;
+        totalCost += baseCheeseCost * Mathf.Pow(1.1f, amount);
+        for (int i = 1; i < buyAmount; i++)
+        {
+            totalCost +=  baseCheeseCost * Mathf.Pow(1.1f, amount + i);
+        }
+        return totalCost;
+    }
+
+
+    private void Start() {
         ChangeText();
         StartCoroutine(UpdateCheese());
     }
 
     public void ChangeText() {
-        amount_text.text = "Amount: " + amount;
-        cost_text.text = "Cost: " + cheese_cost;
-        unit_cps_text.text = "Unit CPS: " + cheese_per_second;
-        total_cps_text.text = "Total CPS: " + total_cheese_per_second;
+        cheeseCost = CalculateCost(0);
+        infoText.text = buildingName + ": " + "\n" + "Amount: " + amount + "\n" + "Cost: " + cheeseCost + "\n" + "Unit CPS: " + cheesePerSecond + "\n" + "Total CPS: " + totalCheesePerSecond + "\n";
+    }
 
+    private void OnValidate() {
+        cheeseCost = CalculateCost(0);
+        infoText.text = buildingName 
+        + ": " + "\n" + "Amount: " + amount 
+        + "\n" + "Cost: " + cheeseCost + "\n"
+        + "Unit CPS: " + cheesePerSecond + "\n" 
+        + "Total CPS: " + totalCheesePerSecond + "\n";
+    }
+
+    public void LoadSaveData(BuildingData buildingData) {
+        this.buildingName = buildingData.buildingName;
+        this.baseCheeseCost = buildingData.cheeseCost;
+        this.cheesePerSecond = buildingData.cheesePerSecond;
+        this.totalCheesePerSecond = buildingData.totalCheesePerSecond;
+        this.amount = buildingData.amount;
+
+    }
+
+    public BuildingData GetBuildingData() {
+        return new BuildingData(buildingName, baseCheeseCost, cheeseCost, cheesePerSecond, totalCheesePerSecond, amount);
     }
 
 
     public void OnBuyButtonClick(int buy_amount) {
 
-        int buy_cost = buy_amount * cheese_cost;
-        if (gameData.total_cheese - buy_cost < 0)
+        float buyCost = CalculateCost(buy_amount);
+        if (gameData.total_cheese - buyCost < 0)
             return;
         else {
             amount += buy_amount;
-            gameData.total_cheese -= buy_cost;
+            gameData.total_cheese -= buyCost;
             CalculateCPS();
             ChangeText();
+
         }
        
     }
 
     void CalculateCPS() {
-        total_cheese_per_second = amount * cheese_per_second;
+        totalCheesePerSecond = amount * cheesePerSecond;
     }
 
 
@@ -63,7 +88,7 @@ public class RatBuildings : MonoBehaviour
         WaitForSeconds wfs_cheese = new WaitForSeconds(1);
         while(true) {
             yield return wfs_cheese;
-            gameData.total_cheese += this.total_cheese_per_second;
+            gameData.total_cheese += this.totalCheesePerSecond;
 
         }
 

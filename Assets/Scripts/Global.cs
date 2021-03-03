@@ -11,6 +11,7 @@ public static class GlobalHelper
     {
 
         GameObject globalInstance = GameObject.Find("Global");
+        if(globalInstance != null)
         _global = globalInstance.GetComponent<Global>();
 
     }
@@ -27,7 +28,11 @@ public static class GlobalHelper
 
             if (_global == null)
             {
-                _global = GameObject.Find("Global").GetComponent<Global>();
+                GameObject globalInstance = GameObject.Find("Global");
+                if (globalInstance != null)
+                {
+                    _global = GameObject.Find("Global").GetComponent<Global>();
+                } 
             }
 
             return _global;
