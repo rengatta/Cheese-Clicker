@@ -18,6 +18,28 @@ public class RatBuildings : MonoBehaviour
     [HideInInspector]
     public int amount = 0;
 
+     
+ 
+
+    private float _cheesePerSecondUpgradeModifier = 1.0f;
+    public float cheesePerSecondUpgradeModifier
+    {
+        get { return _cheesePerSecondUpgradeModifier; }
+
+        set { 
+            _cheesePerSecondUpgradeModifier = value;
+            CalculateCPS();
+        }
+
+    }
+
+    float GetUnitCPS() {
+        return cheesePerSecond * cheesePerSecondUpgradeModifier;
+
+    }
+
+  
+
     public float CalculateCost(int buyAmount) {
 
         float totalCost = 0f;
@@ -30,6 +52,7 @@ public class RatBuildings : MonoBehaviour
     }
 
 
+
     private void Start() {
         ChangeText();
         StartCoroutine(UpdateCheese());
@@ -37,7 +60,7 @@ public class RatBuildings : MonoBehaviour
 
     public void ChangeText() {
         cheeseCost = CalculateCost(0);
-        infoText.text = buildingName + ": " + "\n" + "Amount: " + amount + "\n" + "Cost: " + cheeseCost + "\n" + "Unit CPS: " + cheesePerSecond + "\n" + "Total CPS: " + totalCheesePerSecond + "\n";
+        infoText.text = buildingName + ": " + "\n" + "Amount: " + amount + "\n" + "Cost: " + cheeseCost + "\n" + "Unit CPS: " + GetUnitCPS() + "\n" + "Total CPS: " + totalCheesePerSecond + "\n";
     }
 
     private void OnValidate() {
@@ -45,7 +68,7 @@ public class RatBuildings : MonoBehaviour
         infoText.text = buildingName 
         + ": " + "\n" + "Amount: " + amount 
         + "\n" + "Cost: " + cheeseCost + "\n"
-        + "Unit CPS: " + cheesePerSecond + "\n" 
+        + "Unit CPS: " + GetUnitCPS() + "\n" 
         + "Total CPS: " + totalCheesePerSecond + "\n";
     }
 
@@ -72,14 +95,14 @@ public class RatBuildings : MonoBehaviour
             amount += buy_amount;
             gameData.total_cheese -= buyCost;
             CalculateCPS();
-            ChangeText();
 
         }
        
     }
 
     void CalculateCPS() {
-        totalCheesePerSecond = amount * cheesePerSecond;
+        totalCheesePerSecond = amount * cheesePerSecond * cheesePerSecondUpgradeModifier;
+        ChangeText();
     }
 
 

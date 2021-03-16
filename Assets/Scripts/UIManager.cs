@@ -12,6 +12,9 @@ public class UIManager : MonoBehaviour
     public AudioSource audioSource;
     public Toggle muteToggle;
 
+    public GameObject upgradesRoot;
+    public GameObject purchasedUpgradesRoot;
+    bool upgradesActive = true;
     void Start()
     {
 
@@ -41,6 +44,22 @@ public class UIManager : MonoBehaviour
         }
 
     }
+
+    public void ShowYourUpgradesButtonPressed()
+    {
+        if(upgradesActive) {
+            upgradesRoot.SetActive(false);
+            purchasedUpgradesRoot.SetActive(true);
+            upgradesActive = false;
+        } else {
+            upgradesRoot.SetActive(true);
+            purchasedUpgradesRoot.SetActive(false);
+            upgradesActive = true;
+
+        }
+
+    }
+
 
 
 }
