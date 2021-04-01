@@ -7,6 +7,7 @@ public class ValueUpdater : MonoBehaviour
 {
     public GameData gameData;
 
+
     public TextMeshProUGUI cheese_text;
     public TextMeshProUGUI cps_text;
 
@@ -19,7 +20,10 @@ public class ValueUpdater : MonoBehaviour
             prev_cheese = gameData.total_cheese;
             yield return wfs_cps;
             new_cheese = gameData.total_cheese;
-            cps_text.text = "Total CPS: " + (new_cheese - prev_cheese);
+            cps_text.text = "Total CPS: " + (int)(new_cheese - prev_cheese);
+            if(gameData.saveManager.currentScoreData.highestCPS < new_cheese - prev_cheese) {
+                gameData.saveManager.currentScoreData.highestCPS = new_cheese - prev_cheese;
+            }
 
         }
 
@@ -32,6 +36,6 @@ public class ValueUpdater : MonoBehaviour
 
     void Update()
     {
-        cheese_text.text = "Cheese: " + gameData.total_cheese;
+        cheese_text.text = "Cheese: " + (int)gameData.total_cheese;
     }
 }

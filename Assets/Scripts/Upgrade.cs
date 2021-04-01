@@ -21,6 +21,7 @@ public class Upgrade : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     bool purchased = false;
 
     public GameObject purchasedUpgradesContent;
+    public GameObject buyableUpgradesContent;
 
 
     public void GetUpgradeInfo() {
@@ -49,9 +50,18 @@ public class Upgrade : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         mouseEntered = false;
         GetComponent<Button>().interactable = false;
         transform.SetParent(purchasedUpgradesContent.transform);
-       
+
         //Destroy(this.gameObject);
     }
+
+    public void ReaddUpgrade() {
+        upgradeOverlay.SetActive(false);
+        purchased = false;
+        mouseEntered = false;
+        GetComponent<Button>().interactable = true;
+        transform.SetParent(buyableUpgradesContent.transform);
+    }
+
 
     public void AttemptPurchase() {
         if (gameData.total_cheese - upgradeCost < 0)
@@ -65,6 +75,11 @@ public class Upgrade : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         }
     }
  
+    public void PurchaseWithoutCost() {
+        upgradeBought.Invoke();
+        RemoveUpgrade();
+    }
+
 
     private void Update() {
         if(mouseEntered) {

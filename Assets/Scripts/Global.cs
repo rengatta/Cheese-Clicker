@@ -42,6 +42,12 @@ public static class GlobalHelper
   
 }
 
+public static class SceneToSceneData {
+    public static bool isLoading = false;
+    public static string loadPath = "";
+
+}
+
 
 public class Global : MonoBehaviour
 {

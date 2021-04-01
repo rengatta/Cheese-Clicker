@@ -60,7 +60,7 @@ public class RatBuildings : MonoBehaviour
 
     public void ChangeText() {
         cheeseCost = CalculateCost(0);
-        infoText.text = buildingName + ": " + "\n" + "Amount: " + amount + "\n" + "Cost: " + cheeseCost + "\n" + "Unit CPS: " + GetUnitCPS() + "\n" + "Total CPS: " + totalCheesePerSecond + "\n";
+        infoText.text = buildingName + ": " + "\n" + "Amount: " + (int)amount + "\n" + "Cost: " + (int)cheeseCost + "\n" + "Unit CPS: " + (int)GetUnitCPS() + "\n" + "Total CPS: " + (int)totalCheesePerSecond + "\n";
     }
 
     private void OnValidate() {
@@ -73,16 +73,12 @@ public class RatBuildings : MonoBehaviour
     }
 
     public void LoadSaveData(BuildingData buildingData) {
-        this.buildingName = buildingData.buildingName;
-        this.baseCheeseCost = buildingData.cheeseCost;
-        this.cheesePerSecond = buildingData.cheesePerSecond;
-        this.totalCheesePerSecond = buildingData.totalCheesePerSecond;
         this.amount = buildingData.amount;
-
+        CalculateCPS(); 
     }
 
     public BuildingData GetBuildingData() {
-        return new BuildingData(buildingName, baseCheeseCost, cheeseCost, cheesePerSecond, totalCheesePerSecond, amount);
+        return new BuildingData(buildingName, amount);
     }
 
 
