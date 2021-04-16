@@ -13,6 +13,7 @@ public class AuthSetup : MonoBehaviour
     // add them if possible.
     void Start()
     {
+        Debug.Log("START");
         Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
         {
             Debug.Log("Checking for dependencies.");

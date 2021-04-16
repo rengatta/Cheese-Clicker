@@ -15,6 +15,10 @@ MonoBehaviour:
   signInScene:
     m_SceneAsset: {fileID: 102900000, guid: 2cda990e2423bbf4892e6590ba056729, type: 3}
     m_SceneName: LoginMenu
+  loadingScene:
+    m_SceneAsset: {fileID: 102900000, guid: 7f1f9d10cf558554882e0043c4d08c25, type: 3}
+    m_SceneName: LoadingScene
   mainScene:
     m_SceneAsset: {fileID: 102900000, guid: dffa1e584dfcacd4cbb3f4de184eb980, type: 3}
     m_SceneName: Clicker
+  firstSignIn: 0

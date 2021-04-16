@@ -5,6 +5,8 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using Firebase.Database;
+using Firebase.Extensions;
 
 [System.Serializable]
 public class BuildingData  {
@@ -33,14 +35,14 @@ public class SaveData {
 
     public List<BuildingData> buildingsPurchased = new List<BuildingData>();
     public List<string> upgradesPurchased = new List<string>();
+    public ScoreData scoreData = new ScoreData();
 
 
     public float currentCheese = 0f;
     public string username = "";
+    public string email = "";
 
-
-    public ScoreData scoreData = new ScoreData();
-
+   
     public SaveData() {
 
     }
@@ -63,6 +65,9 @@ public class SaveManager : MonoBehaviour
     public SceneField gameScene;
     public TextMeshProUGUI saveText;
 
+    public GameObject cantCloudSavePrompt;
+
+
     IEnumerator ShowSaveText(string text) {
         saveText.text = text;
 
@@ -75,9 +80,10 @@ public class SaveManager : MonoBehaviour
 
     public void ResetSaveData()
     {
-        string username = gameData.username;
-        LoadSaveData("StartData");
-        gameData.username = username;
+        SceneToSceneData.username = gameData.username;
+        SceneToSceneData.resetSave = true;
+        ResetScene();
+        
     }
 
     public void StartAutosave(float intervalMinutes) {
@@ -97,12 +103,37 @@ public class SaveManager : MonoBehaviour
 
     void Start() {
 
-        CreateSaveData("StartData");
-        gameData.username = "Guest";
+
+        if (SceneToSceneData.resetSave)
+        {
+            gameData.username = SceneToSceneData.username;
+
+        }
+        else if (GlobalHelper.global.userID != "Guest")
+        {
+            gameData.username = GlobalHelper.global.auth.CurrentUser.Email;
+        }
+        else if (GlobalHelper.global.userID == "Guest")
+        {
+            gameData.username = "Guest";
+
+        }
+        if (GlobalHelper.global.userID == "") GlobalHelper.global.userID = "Guest";
 
 
-        if(SceneToSceneData.isLoading == true) {
-            LoadSaveDataGeneric(SceneToSceneData.loadPath);
+
+
+        SceneToSceneData.resetSave = false;
+    
+
+        if (GlobalHelper.global.userID == "Guest") {
+            Debug.Log("LOADING GUEST");
+            LoadSaveData("Guest");
+
+        } else {
+            Debug.Log("CLOUDSAVE1");
+            LoadCloudSaveData();
+
         }
 
         StartAutosave(1);
@@ -112,7 +143,7 @@ public class SaveManager : MonoBehaviour
     SaveData GetSaveData() {
         SaveData newSave = new SaveData();
         newSave.scoreData = currentScoreData;
-
+        newSave.currentCheese = gameData.total_cheese;
 
         foreach (Transform child in purchasedUpgrades)
         {
@@ -131,55 +162,158 @@ public class SaveManager : MonoBehaviour
         return newSave;
     }
 
-    public void CreateSaveData(string username)
-    {
-        Save(GetSaveData(), username);
-        StartCoroutine(ShowSaveText("Saved."));
-    }
-
-
+    //savebuttonpressed
     public void CreateSaveData() {
 
         Save(GetSaveData());
         StartCoroutine(ShowSaveText("Saved."));
     }
 
-    public void Save(SaveData saveData)
+    public class User
     {
-        string username = GlobalHelper.global.email;
-        string path;
-        if (username == "")
-            path = Application.dataPath + "\\Saves\\" + "guest";
-        else
-            path = Application.dataPath + "\\Saves\\" + username;
+        public string username;
+        public string email;
 
-        if (path.Length == 0) {
-            Debug.Log("Save failed.");
-            return;
+        public User()
+        {
         }
 
-        saveData.username = username;
-
-        string json = JsonUtility.ToJson(saveData);
-        File.WriteAllText(path, json);
+        public User(string username, string email)
+        {
+            this.username = username;
+            this.email = email;
+        }
     }
 
-
-    public void Save(SaveData saveData, string username)
+    private void writeNewUser(string userId, string name, string email, DatabaseReference mDatabaseRef)
     {
+        User user = new User(name, email);
+        string json = JsonUtility.ToJson(user);
 
-        string path = Application.dataPath + "\\Saves\\" + username;
-        saveData.username = username;
-        string json = JsonUtility.ToJson(saveData);
-        File.WriteAllText(path, json);
+        mDatabaseRef.Child("users").Child(userId).SetRawJsonValueAsync(json);
     }
+
+
+
+    public void LoadCloudSaveData() {
+        if (GlobalHelper.global.userID != "Guest")
+        {
+            Debug.Log("LOADING CLOUD SAVE");
+
+            // string json = JsonUtility.ToJson(saveData);
+
+            FirebaseDatabase.DefaultInstance.GetReference("users/" + GlobalHelper.global.auth.CurrentUser.UserId + "/saveData").GetValueAsync().ContinueWithOnMainThread(t => {
+                if (t.IsCanceled)
+                {
+                    Debug.Log("FirebaseDatabaseError: IsCanceled: " + t.Exception);
+                    return;
+                }
+
+                if (t.IsFaulted)
+                {
+                    Debug.Log("FirebaseDatabaseError: IsFaulted:" + t.Exception);
+                    return;
+                }
+
+                DataSnapshot snapshot = t.Result;
+               
+                SaveData saveData1 = JsonUtility.FromJson<SaveData>(snapshot.GetRawJsonValue());
+                Debug.Log(saveData1.currentCheese);
+                LoadSaveData2(saveData1);
+            });
+
+          
+          
+        }
+    }
+
+    public void LoadSaveData2(SaveData newLoadData)
+    {
+        Debug.Log("LOAD2");
+        currentScoreData = newLoadData.scoreData;
+
+        for (int i = 0; i < buildings.childCount; i++)
+        {
+
+            RatBuildings ratBuilding = buildings.GetChild(i).GetComponent<RatBuildings>();
+            if (ratBuilding != null)
+            {
+                int index = newLoadData.buildingsPurchased.FindIndex(x => x.buildingName == ratBuilding.buildingName);
+                ratBuilding.LoadSaveData(newLoadData.buildingsPurchased[index]);
+            }
+
+        }
+        Debug.Log(newLoadData.currentCheese);
+        gameData.total_cheese = newLoadData.currentCheese;
+        gameData.username = newLoadData.username;
+
+        for (int i = buyableUpgrades.childCount - 1; i >= 0; i--)
+        {
+
+            Upgrade upgradeInstance = buyableUpgrades.GetChild(i).GetComponent<Upgrade>();
+
+            if (upgradeInstance != null)
+            {
+                int index = newLoadData.upgradesPurchased.FindIndex(x => x == upgradeInstance.upgradeName);
+
+
+                if (index != -1)
+                {
+                    upgradeInstance.PurchaseWithoutCost();
+                }
+
+            }
+
+        }
+
+    }
+
+
+
+
+    public void Save(SaveData saveData)
+    {
+        if (GlobalHelper.global.userID != "Guest") {
+
+       
+
+            saveData.username = gameData.username;
+            saveData.email = GlobalHelper.global.email.Replace(".", "_");
+            
+            string json = JsonUtility.ToJson(saveData);
+
+            DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("users/" + GlobalHelper.global.auth.CurrentUser.UserId + "/saveData");
+            reference.SetRawJsonValueAsync(json);
+
+
+
+        } else {
+            cantCloudSavePrompt.SetActive(true);
+            string path = Application.streamingAssetsPath + "\\Saves\\" + gameData.username;
+
+            if (path.Length == 0)
+            {
+                Debug.Log("Save failed.");
+                return;
+            }
+
+            saveData.username = gameData.username;
+            saveData.email = GlobalHelper.global.email;
+
+            string json = JsonUtility.ToJson(saveData);
+            File.WriteAllText(path, json);
+        }
+      
+    }
+
+
 
   
     public void ResetScene() {
         SceneManager.LoadScene(gameScene);
 
     }
-
+   
     public bool LoadSaveDataGeneric(string path) {
 
         if (!File.Exists(path))
@@ -236,28 +370,14 @@ public class SaveManager : MonoBehaviour
 
     public void LoadSaveData(string username)
     {
-        //string path = Application.dataPath + "\\LevelSaves\\" + levelName;
-        string path = Application.dataPath + "\\Saves\\" + username;
-        SceneToSceneData.isLoading = true;
-        SceneToSceneData.loadPath = path;
-        ResetScene();
-       // LoadSaveDataGeneric(path);
-
-    }
-    public void LoadSaveData()
-    {
-        //string path = Application.dataPath + "\\LevelSaves\\" + levelName;
-        string path = EditorUtility.OpenFilePanel("Select a level file", Application.dataPath + "\\Saves\\", "");
-        if(File.Exists(path)) {
-            SceneToSceneData.isLoading = true;
-            SceneToSceneData.loadPath = path;
-            ResetScene();
-        }
-        //LoadSaveDataGeneric(path);
+        //string path = Application.streamingAssetsPath + "\\LevelSaves\\" + levelName;
+        string path = Application.streamingAssetsPath + "\\Saves\\" + username;
+        LoadSaveDataGeneric(path);
 
     }
 
 
 
-  
+
+
 }

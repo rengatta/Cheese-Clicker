@@ -15,6 +15,8 @@ public class UIManager : MonoBehaviour
     public GameObject upgradesRoot;
     public GameObject purchasedUpgradesRoot;
     bool upgradesActive = true;
+
+    public SceneField loadingScene;
     void Start()
     {
 
@@ -30,9 +32,7 @@ public class UIManager : MonoBehaviour
     }
 
     public void LogoutButtonPressed() {
-        if(GlobalHelper.global.auth != null) {
-            GlobalHelper.global.auth.SignOut();
-        }
+        SceneManager.LoadScene(loadingScene);
         
     }
 

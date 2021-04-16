@@ -43,8 +43,13 @@ public static class GlobalHelper
 }
 
 public static class SceneToSceneData {
+    public static SaveData tempSaveData;
     public static bool isLoading = false;
     public static string loadPath = "";
+    public static string username = "";
+    public static bool resetSave = false;
+    public static bool canCloudSave = false;
+    public static string genericString = "";
 
 }
 
@@ -52,7 +57,9 @@ public static class SceneToSceneData {
 public class Global : MonoBehaviour
 {
     public string email = "";
+    public string userID = "";
     public AuthManager authManager;
+    public TextMeshProUGUI tempText;
     public Firebase.Auth.FirebaseAuth auth;
-
+    public Firebase.Auth.FirebaseUser currentUser;
 }
