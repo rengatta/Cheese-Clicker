@@ -77,13 +77,11 @@ public class SaveManager : MonoBehaviour
 
     }
 
+    public void ResetSaveData() {
 
-    public void ResetSaveData()
-    {
         SceneToSceneData.username = gameData.username;
         SceneToSceneData.resetSave = true;
         ResetScene();
-        
     }
 
     public void StartAutosave(float intervalMinutes) {
@@ -98,42 +96,45 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-
-
-
     void Start() {
 
+        if (GlobalHelper.global.userID == "") GlobalHelper.global.userID = "Guest";
 
-        if (SceneToSceneData.resetSave)
+
+      //  bool getCloudSaveUsername = false;
+
+        if(SceneToSceneData.newSignupUsername != "") {
+            gameData.username = SceneToSceneData.newSignupUsername;
+        }
+        else if (SceneToSceneData.resetSave)
         {
             gameData.username = SceneToSceneData.username;
 
-        }
-        else if (GlobalHelper.global.userID != "Guest")
-        {
-            gameData.username = GlobalHelper.global.auth.CurrentUser.Email;
         }
         else if (GlobalHelper.global.userID == "Guest")
         {
             gameData.username = "Guest";
 
         }
-        if (GlobalHelper.global.userID == "") GlobalHelper.global.userID = "Guest";
+     
+        if (SceneToSceneData.resetSave != true) {
+            
+            if (GlobalHelper.global.userID == "Guest") {
+                Debug.Log("LOADING GUEST");
+                LoadSaveData("Guest");
 
+            }
+            else {
+                Debug.Log("CLOUDSAVE1");
+                LoadCloudSaveData();
 
-
-
-        SceneToSceneData.resetSave = false;
-    
-
-        if (GlobalHelper.global.userID == "Guest") {
-            Debug.Log("LOADING GUEST");
-            LoadSaveData("Guest");
+            }
 
         } else {
-            Debug.Log("CLOUDSAVE1");
-            LoadCloudSaveData();
 
+            //if the save is resetting, create a new save data on top of the initial starting scene to save over the previous data with a blank slate
+            CreateSaveData();
+            SceneToSceneData.resetSave = false;
         }
 
         StartAutosave(1);
@@ -169,30 +170,6 @@ public class SaveManager : MonoBehaviour
         StartCoroutine(ShowSaveText("Saved."));
     }
 
-    public class User
-    {
-        public string username;
-        public string email;
-
-        public User()
-        {
-        }
-
-        public User(string username, string email)
-        {
-            this.username = username;
-            this.email = email;
-        }
-    }
-
-    private void writeNewUser(string userId, string name, string email, DatabaseReference mDatabaseRef)
-    {
-        User user = new User(name, email);
-        string json = JsonUtility.ToJson(user);
-
-        mDatabaseRef.Child("users").Child(userId).SetRawJsonValueAsync(json);
-    }
-
 
 
     public void LoadCloudSaveData() {
@@ -215,11 +192,17 @@ public class SaveManager : MonoBehaviour
                     return;
                 }
 
-                DataSnapshot snapshot = t.Result;
-               
-                SaveData saveData1 = JsonUtility.FromJson<SaveData>(snapshot.GetRawJsonValue());
-                Debug.Log(saveData1.currentCheese);
-                LoadSaveData2(saveData1);
+                if (t.Result.Exists)  {
+                    DataSnapshot snapshot = t.Result;
+
+                    SaveData saveData1 = JsonUtility.FromJson<SaveData>(snapshot.GetRawJsonValue());
+                    LoadSaveData2(saveData1);
+
+                } else {
+                    Debug.Log("No compatible data exists.");
+                    
+                }
+             
             });
 
           
@@ -243,7 +226,6 @@ public class SaveManager : MonoBehaviour
             }
 
         }
-        Debug.Log(newLoadData.currentCheese);
         gameData.total_cheese = newLoadData.currentCheese;
         gameData.username = newLoadData.username;
 
@@ -271,11 +253,9 @@ public class SaveManager : MonoBehaviour
 
 
 
-    public void Save(SaveData saveData)
-    {
-        if (GlobalHelper.global.userID != "Guest") {
+    public void Save(SaveData saveData) {
 
-       
+        if (GlobalHelper.global.userID != "Guest") {
 
             saveData.username = gameData.username;
             saveData.email = GlobalHelper.global.email.Replace(".", "_");
@@ -283,9 +263,8 @@ public class SaveManager : MonoBehaviour
             string json = JsonUtility.ToJson(saveData);
 
             DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("users/" + GlobalHelper.global.auth.CurrentUser.UserId + "/saveData");
+            
             reference.SetRawJsonValueAsync(json);
-
-
 
         } else {
             cantCloudSavePrompt.SetActive(true);
@@ -306,23 +285,18 @@ public class SaveManager : MonoBehaviour
       
     }
 
-
-
-  
     public void ResetScene() {
         SceneManager.LoadScene(gameScene);
 
     }
-   
+  
     public bool LoadSaveDataGeneric(string path) {
 
-        if (!File.Exists(path))
-        {
+        if (!File.Exists(path)) {
             Debug.Log("FILE DOES NOT EXIST.");
             return false;
         }
-        else
-        {
+        else {
             string readText = File.ReadAllText(path);
 
             SaveData newLoadData = JsonUtility.FromJson<SaveData>(readText);
@@ -359,7 +333,6 @@ public class SaveManager : MonoBehaviour
                 }
 
             }
-           
 
         }
         SceneToSceneData.isLoading = false;
@@ -368,16 +341,10 @@ public class SaveManager : MonoBehaviour
     }
 
 
-    public void LoadSaveData(string username)
-    {
+    public void LoadSaveData(string username) {
         //string path = Application.streamingAssetsPath + "\\LevelSaves\\" + levelName;
         string path = Application.streamingAssetsPath + "\\Saves\\" + username;
         LoadSaveDataGeneric(path);
-
     }
-
-
-
-
 
 }

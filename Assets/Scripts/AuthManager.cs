@@ -1,6 +1,7 @@
 ﻿//code taken from this tutorial https://spin.atomicobject.com/2020/06/09/firebase-unity-user-accounts/
 using System;
 using System.Collections.Generic;
+using Firebase.Database;
 using Firebase.Extensions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -27,12 +28,35 @@ public class AuthManager : ScriptableObject
     // Handle initialization of the necessary firebase modules:
 
 
+    public void DeleteUserAccount() {
+        Debug.Log("Deleting user account");
+        Firebase.Auth.FirebaseUser user = GlobalHelper.global.auth.CurrentUser;
+        if (user != null)
+        {
+            user.DeleteAsync().ContinueWithOnMainThread(task => {
+                if (task.IsCanceled)
+                {
+                    Debug.LogError("DeleteAsync was canceled.");
+                    return;
+                }
+                if (task.IsFaulted)
+                {
+                    Debug.LogError("DeleteAsync encountered an error: " + task.Exception);
+                    return;
+                }
+
+                Debug.Log("User deleted successfully.");
+
+                DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("users/" + GlobalHelper.global.auth.CurrentUser.UserId + "/saveData");
+                reference.SetRawJsonValueAsync(null);
+
+                SceneManager.LoadScene(loadingScene);
+            });
+        }
+    }
 
 
-    public void InitializeFirebase()
-    {
-
-
+    public void InitializeFirebase() {
 
         GlobalHelper.global.auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
 

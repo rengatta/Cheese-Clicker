@@ -50,6 +50,10 @@ public static class SceneToSceneData {
     public static bool resetSave = false;
     public static bool canCloudSave = false;
     public static string genericString = "";
+    public static bool accountCreationSuccessful = false;
+    public static bool authLoaded = false;
+
+    public static string newSignupUsername = "";
 
 }
 

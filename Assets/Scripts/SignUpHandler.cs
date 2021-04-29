@@ -1,5 +1,6 @@
 ﻿//code taken from this tutorial https://spin.atomicobject.com/2020/06/09/firebase-unity-user-accounts/
 using System;
+using System.Collections;
 using System.Threading.Tasks;
 using Firebase.Auth;
 using Firebase.Extensions;
@@ -16,21 +17,20 @@ public class SignUpHandler : MonoBehaviour
     public TMP_InputField confirmPasswordTextBox;
     public Button backButton;
     public Button signupButton;
-    public TMP_Text emailErrorText;
     public TMP_Text passwordErrorText;
-    protected Firebase.Auth.FirebaseAuth auth;
-    protected string displayName = "";
+    public string displayName = "";
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
-        signupButton.onClick.AddListener(() => canSubmit());
-        backButton.onClick.AddListener(() => SceneManager.LoadScene(signInScene));
-    }
+    public TMP_InputField usernameInputField;
 
-    private void canSubmit()
-    {
+
+
+    public void SignUpButtonClicked() {
+        if (usernameInputField.text == "")
+        {
+            passwordErrorText.text = "Nothing in the username input field.";
+            passwordErrorText.enabled = true;
+        }
+
         passwordErrorText.enabled = false;
         if (passwordTextBox.text != confirmPasswordTextBox.text)
         {
@@ -43,8 +43,30 @@ public class SignUpHandler : MonoBehaviour
         }
     }
 
+    public void BackButtonClicked() {
+        SceneManager.LoadScene(signInScene);
+    }
+    bool loginAttemptComplete = false;
+
+
+    private void Start()
+    {
+        //StartCoroutine(WaitLogin());
+    }
+
+    IEnumerator WaitLogin() {
+          while(true) {
+            if(loginAttemptComplete == true) {
+                SceneManager.LoadScene(signInScene);
+
+            }
+            yield return null;
+          }
+
+    }
+
     // Create a user with the email and password.
-    public Task CreateUserWithEmailAsync()
+    public void CreateUserWithEmailAsync()
     {
         string email = emailTextBox.text;
         string password = passwordTextBox.text;
@@ -52,22 +74,20 @@ public class SignUpHandler : MonoBehaviour
         Debug.Log(String.Format("Attempting to create user {0}...", email));
         DisableUI();
 
-        // This passes the current displayName through to HandleCreateUserAsync
-        // so that it can be passed to UpdateUserProfile().  displayName will be
-        // reset by AuthStateChanged() when the new user is created and signed in.
-        return auth.CreateUserWithEmailAndPasswordAsync(email, password)
-          .ContinueWithOnMainThread((task) => {
-              EnableUI();
-              LogTaskCompletion(task, "User Creation");
-              return task;
-          }).Unwrap();
+
+        GlobalHelper.global.auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task => {
+            EnableUI();
+            LogTaskCompletion(task, "User Creation");
+            
+        }
+        );
     }
 
     // Log the result of the specified task, returning true if the task
     // completed successfully, false otherwise.
-    protected bool LogTaskCompletion(Task task, string operation)
+    public void LogTaskCompletion(Task task, string operation)
     {
-        bool complete = false;
+
         if (task.IsCanceled)
         {
             Debug.Log(operation + " canceled.");
@@ -81,9 +101,8 @@ public class SignUpHandler : MonoBehaviour
                 Firebase.FirebaseException firebaseEx = exception as Firebase.FirebaseException;
                 if (firebaseEx != null)
                 {
-                    authErrorCode = String.Format("AuthError.{0}: ",
-                      ((Firebase.Auth.AuthError)firebaseEx.ErrorCode).ToString());
-                    GetErrorMessage((Firebase.Auth.AuthError)firebaseEx.ErrorCode);
+                    authErrorCode = String.Format("AuthError.{0}: ", ((AuthError)firebaseEx.ErrorCode).ToString() );
+                    GetErrorMessage((AuthError)firebaseEx.ErrorCode);
                 }
                 Debug.Log(authErrorCode + exception.ToString());
             }
@@ -91,9 +110,15 @@ public class SignUpHandler : MonoBehaviour
         else if (task.IsCompleted)
         {
             Debug.Log(operation + " completed");
-            complete = true;
+           
+            SceneToSceneData.accountCreationSuccessful = true;
+            SceneToSceneData.newSignupUsername = usernameInputField.text;
+
+            passwordErrorText.text = "Account successfully created!.";
+            loginAttemptComplete = true;
+            SceneManager.LoadScene(signInScene);
         }
-        return complete;
+
     }
 
     void DisableUI()
@@ -103,7 +128,6 @@ public class SignUpHandler : MonoBehaviour
         confirmPasswordTextBox.DeactivateInputField();
         backButton.interactable = false;
         signupButton.interactable = false;
-        emailErrorText.enabled = false;
         passwordErrorText.enabled = false;
     }
 
@@ -116,24 +140,8 @@ public class SignUpHandler : MonoBehaviour
         signupButton.interactable = true;
     }
 
-    // Update the user's display name with the currently selected display name.
-    public Task UpdateUserProfileAsync(string newDisplayName = null)
-    {
-        if (auth.CurrentUser == null)
-        {
-            Debug.Log("Not signed in, unable to update user profile");
-            return Task.FromResult(0);
-        }
-        displayName = newDisplayName ?? displayName;
-        Debug.Log("Updating user profile " + displayName);
-        return auth.CurrentUser.UpdateUserProfileAsync(new Firebase.Auth.UserProfile
-        {
-            DisplayName = displayName,
-            PhotoUrl = auth.CurrentUser.PhotoUrl,
-        });
-    }
-
-    private void GetErrorMessage(AuthError errorCode)
+  
+    void GetErrorMessage(AuthError errorCode)
     {
         switch (errorCode)
         {
@@ -146,24 +154,24 @@ public class SignUpHandler : MonoBehaviour
                 passwordErrorText.enabled = true;
                 break;
             case AuthError.InvalidEmail:
-                emailErrorText.text = "Invalid email.";
-                emailErrorText.enabled = true;
+                passwordErrorText.text = "Invalid email.";
+                passwordErrorText.enabled = true;
                 break;
             case AuthError.MissingEmail:
-                emailErrorText.text = "Missing email.";
-                emailErrorText.enabled = true;
+                passwordErrorText.text = "Missing email.";
+                passwordErrorText.enabled = true;
                 break;
             case AuthError.UserNotFound:
-                emailErrorText.text = "Account not found.";
-                emailErrorText.enabled = true;
+                passwordErrorText.text = "Account not found.";
+                passwordErrorText.enabled = true;
                 break;
             case AuthError.EmailAlreadyInUse:
-                emailErrorText.text = "Email already in use.";
-                emailErrorText.enabled = true;
+                passwordErrorText.text = "Email already in use.";
+                passwordErrorText.enabled = true;
                 break;
             default:
-                emailErrorText.text = "Unknown error occurred.";
-                emailErrorText.enabled = true;
+                passwordErrorText.text = "Unknown error occurred.";
+                passwordErrorText.enabled = true;
                 break;
         }
     }

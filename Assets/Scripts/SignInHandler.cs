@@ -18,6 +18,11 @@ public class SignInHandler : MonoBehaviour
     
     public void Start()
     {
+        if(SceneToSceneData.accountCreationSuccessful == true) {
+            bad_signin_text.text = "Account successfully created!";
+            SceneToSceneData.accountCreationSuccessful = false;
+        }
+
 
         SceneToSceneData.username = "";
         if (GlobalHelper.global == null || GlobalHelper.global.auth == null)
@@ -34,15 +39,10 @@ public class SignInHandler : MonoBehaviour
                 }
 
             }
-
-
-
         }
-
-       
-
-      
     }
+
+
     public void ToggleSaveSigninInfo() {
         if (saveSigninInfoToggle.isOn)
         {

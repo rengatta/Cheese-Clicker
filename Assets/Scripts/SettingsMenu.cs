@@ -10,6 +10,10 @@ public class SettingsMenu : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public SaveManager saveManager;
 
+    public GameObject warningPromptRoot;
+    public TextMeshProUGUI warningPromptText;
+
+    public GameObject deleteUserPrompt;
 
     public void OnScoresButtonPressed() {
         scoresMenu.SetActive(true);
@@ -28,15 +32,27 @@ public class SettingsMenu : MonoBehaviour
     }
 
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+
+    public void CheckDeleteUserAccount() {
+        if (GlobalHelper.global.userID == "Guest")
+        {
+            warningPromptRoot.SetActive(true);
+            warningPromptText.text = "This functionality is disabled for local guests.";
+
+        }
+        else
+        {
+            deleteUserPrompt.SetActive(true);
+
+        }
+
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    public void DeleteUserAccount() {
+        GlobalHelper.global.authManager.DeleteUserAccount();
+
     }
+
+
+
 }
