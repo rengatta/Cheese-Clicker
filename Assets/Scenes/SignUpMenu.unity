@@ -2528,12 +2528,16 @@ MonoBehaviour:
   signInScene:
     m_SceneAsset: {fileID: 102900000, guid: 2cda990e2423bbf4892e6590ba056729, type: 3}
     m_SceneName: LoginMenu
+  clickerScene:
+    m_SceneAsset: {fileID: 102900000, guid: dffa1e584dfcacd4cbb3f4de184eb980, type: 3}
+    m_SceneName: Clicker
   emailTextBox: {fileID: 911564048}
   passwordTextBox: {fileID: 244203532}
   confirmPasswordTextBox: {fileID: 1586985427}
   backButton: {fileID: 734414107}
   signupButton: {fileID: 1016486189}
   passwordErrorText: {fileID: 126840009}
+  displayName: 
   usernameInputField: {fileID: 201778743}
 --- !u!1 &1148628234
 GameObject:

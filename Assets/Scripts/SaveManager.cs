@@ -98,49 +98,38 @@ public class SaveManager : MonoBehaviour
 
     void Start() {
 
-        if (GlobalHelper.global.userID == "") GlobalHelper.global.userID = "Guest";
+        //  bool getCloudSaveUsername = false;
 
-
-      //  bool getCloudSaveUsername = false;
 
         if(SceneToSceneData.newSignupUsername != "") {
+            //new signup
             gameData.username = SceneToSceneData.newSignupUsername;
-        }
-        else if (SceneToSceneData.resetSave)
-        {
-            gameData.username = SceneToSceneData.username;
-
-        }
-        else if (GlobalHelper.global.userID == "Guest")
-        {
-            gameData.username = "Guest";
-
-        }
-     
-        if (SceneToSceneData.resetSave != true) {
-            
-            if (GlobalHelper.global.userID == "Guest") {
-                Debug.Log("LOADING GUEST");
-                LoadSaveData("Guest");
-
-            }
-            else {
-                Debug.Log("CLOUDSAVE1");
-                LoadCloudSaveData();
-
-            }
-
-        } else {
-
-            //if the save is resetting, create a new save data on top of the initial starting scene to save over the previous data with a blank slate
+            SceneToSceneData.newSignupUsername = "";
             CreateSaveData();
-            SceneToSceneData.resetSave = false;
         }
+        else  if (SceneToSceneData.resetSave) {
+            //if the save reset button was pressed
+            //if the save is resetting, create a new save data on top of the initial starting scene to save over the previous data with a blank slate
+            Debug.Log("Resetting save.");
+            gameData.username = SceneToSceneData.username;
+            SceneToSceneData.resetSave = false;
+            CreateSaveData();
+        }
+        else  if (GlobalHelper.global.userID == "Guest") {
+            //if logging in from a guest profile
+            gameData.username = "Guest";
+            Debug.Log("Normal start");
 
+            Debug.Log("Guest login. Loading Guest save.");
+            LoadSaveData("Guest");
+        } else {
+            GetSavedataFromCloud();
+        }
         StartAutosave(1);
+
     }
 
-
+    //transforms all the current scene data into a saveable format
     SaveData GetSaveData() {
         SaveData newSave = new SaveData();
         newSave.scoreData = currentScoreData;
@@ -163,7 +152,8 @@ public class SaveManager : MonoBehaviour
         return newSave;
     }
 
-    //savebuttonpressed
+
+    //activates when the save button is pressed
     public void CreateSaveData() {
 
         Save(GetSaveData());
@@ -171,9 +161,9 @@ public class SaveManager : MonoBehaviour
     }
 
 
-
-    public void LoadCloudSaveData() {
-        if (GlobalHelper.global.userID != "Guest")
+    public void GetSavedataFromCloud() {
+        Debug.Log("LoadCloudSaveData");
+        if (gameData.username != "Guest")
         {
             Debug.Log("LOADING CLOUD SAVE");
 
@@ -196,11 +186,12 @@ public class SaveManager : MonoBehaviour
                     DataSnapshot snapshot = t.Result;
 
                     SaveData saveData1 = JsonUtility.FromJson<SaveData>(snapshot.GetRawJsonValue());
-                    LoadSaveData2(saveData1);
+                    LoadCloudProfile(saveData1);
 
                 } else {
-                    Debug.Log("No compatible data exists.");
-                    
+                    Debug.Log("No cloud save or compatible data exists.");
+                    CreateSaveData();
+                    return;
                 }
              
             });
@@ -209,10 +200,10 @@ public class SaveManager : MonoBehaviour
           
         }
     }
-
-    public void LoadSaveData2(SaveData newLoadData)
+    //loads for cloud profiles
+    public void LoadCloudProfile(SaveData newLoadData)
     {
-        Debug.Log("LOAD2");
+        Debug.Log("LoadSaveDataCloud");
         currentScoreData = newLoadData.scoreData;
 
         for (int i = 0; i < buildings.childCount; i++)
@@ -252,22 +243,33 @@ public class SaveManager : MonoBehaviour
 
 
 
-
+    //saves for either cloud or guest profiles
     public void Save(SaveData saveData) {
 
-        if (GlobalHelper.global.userID != "Guest") {
+        if (gameData.username != "Guest") {
+            //saving as cloud profile
 
+            Debug.Log("Cloud saving.");
+            SceneToSceneData.canSignout = false;
             saveData.username = gameData.username;
             saveData.email = GlobalHelper.global.email.Replace(".", "_");
             
             string json = JsonUtility.ToJson(saveData);
 
             DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("users/" + GlobalHelper.global.auth.CurrentUser.UserId + "/saveData");
-            
-            reference.SetRawJsonValueAsync(json);
+   
+            reference.SetRawJsonValueAsync(json).ContinueWithOnMainThread(t => {
+                SceneToSceneData.canSignout = true;
+                Debug.Log("Can sign out.");
 
-        } else {
-            cantCloudSavePrompt.SetActive(true);
+            });
+
+
+        }
+        else {
+            //saving as guest profile
+            Debug.Log("Guest saving.");
+
             string path = Application.streamingAssetsPath + "\\Saves\\" + gameData.username;
 
             if (path.Length == 0)
@@ -284,19 +286,22 @@ public class SaveManager : MonoBehaviour
         }
       
     }
-
+    //resets the scene when new data is loaded
     public void ResetScene() {
+        Debug.Log("Scene resetting");
         SceneManager.LoadScene(gameScene);
 
     }
-  
+    //used for guest profile loading
     public bool LoadSaveDataGeneric(string path) {
 
+        Debug.Log("LoadSaveDataGeneric");
         if (!File.Exists(path)) {
             Debug.Log("FILE DOES NOT EXIST.");
             return false;
         }
         else {
+            Debug.Log("Reading data.");
             string readText = File.ReadAllText(path);
 
             SaveData newLoadData = JsonUtility.FromJson<SaveData>(readText);
@@ -340,7 +345,7 @@ public class SaveManager : MonoBehaviour
         return true;
     }
 
-
+    //used for guest profile loading
     public void LoadSaveData(string username) {
         //string path = Application.streamingAssetsPath + "\\LevelSaves\\" + levelName;
         string path = Application.streamingAssetsPath + "\\Saves\\" + username;

@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using Firebase.Extensions;
 using UnityEngine.UI;
+using Firebase.Database;
 
 public class SignInHandler : MonoBehaviour
 {
@@ -83,8 +84,8 @@ public class SignInHandler : MonoBehaviour
             {
                 SceneToSceneData.genericString = "TESTING";
                 bad_signin_text.text = "BAD EMAIL OR PASSWORD";
-
                 // Debug.Log("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+
 
             } else {
                 bad_signin_text.text = "Login succesful!";
@@ -93,6 +94,7 @@ public class SignInHandler : MonoBehaviour
                 PlayerPrefs.SetInt("SaveInfoSaved", 1);
                 PlayerPrefs.SetString("username", email_input.text);
                 PlayerPrefs.SetString("password", password_input.text);
+
                 SceneManager.LoadScene(gameScene);
                 //Debug.LogFormat("User signed in successfully: {0} ({1})", newUser.DisplayName, newUser.UserId);
             }
@@ -102,4 +104,15 @@ public class SignInHandler : MonoBehaviour
 
 
     }
+
+
+
+
+
+
+    public void ExitGame() {
+        Application.Quit();
+
+    }
+
 }

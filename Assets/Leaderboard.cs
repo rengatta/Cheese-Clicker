@@ -61,9 +61,11 @@ public class Leaderboard : MonoBehaviour
 
                     DataSnapshot saveData = child.Child("saveData");
 
-                    SaveData saveData1 = JsonUtility.FromJson<SaveData>(saveData.GetRawJsonValue());
+                    if (saveData.Exists) {
+                        SaveData saveData1 = JsonUtility.FromJson<SaveData>(saveData.GetRawJsonValue());
 
-                    saveDataList.Add(saveData1);
+                        saveDataList.Add(saveData1);
+                    } 
                 }
                 saveDataList = saveDataList.OrderByDescending(o => o.scoreData.totalCheeseCollected).ToList();
                 string leaderboardContent = "";
@@ -85,7 +87,7 @@ public class Leaderboard : MonoBehaviour
 
                 }
 
-
+                Debug.Log("Leaderboard Populated.");
                 leaderboardText.text = leaderboardContent;
                 leaderBoardRoot.SetActive(true);
 

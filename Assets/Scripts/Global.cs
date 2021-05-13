@@ -55,6 +55,8 @@ public static class SceneToSceneData {
 
     public static string newSignupUsername = "";
 
+    public static bool canSignout = true;
+
 }
 
 

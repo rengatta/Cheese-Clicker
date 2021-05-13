@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 356898944}
   - component: {fileID: 356898945}
   - component: {fileID: 356898946}
+  - component: {fileID: 356898947}
   m_Layer: 0
   m_Name: Global
   m_TagString: Untagged
@@ -169,7 +170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   email: 
   userID: 
-  authManager: {fileID: 11400000, guid: 280f93b2f85dbf14a82ee1d8a5b21857, type: 2}
+  authManager: {fileID: 356898947}
   tempText: {fileID: 0}
 --- !u!114 &356898946
 MonoBehaviour:
@@ -183,6 +184,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6eb2d8e7871a4b74c9c3561cf99d4514, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &356898947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 356898943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8217638cb57bca4ba670929a4f5fb5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  signInScene:
+    m_SceneAsset: {fileID: 102900000, guid: 2cda990e2423bbf4892e6590ba056729, type: 3}
+    m_SceneName: LoginMenu
+  loadingScene:
+    m_SceneAsset: {fileID: 102900000, guid: 7f1f9d10cf558554882e0043c4d08c25, type: 3}
+    m_SceneName: LoadingScene
+  mainScene:
+    m_SceneAsset: {fileID: 102900000, guid: dffa1e584dfcacd4cbb3f4de184eb980, type: 3}
+    m_SceneName: Clicker
+  signingOut: 0
 --- !u!1 &1053977550
 GameObject:
   m_ObjectHideFlags: 0

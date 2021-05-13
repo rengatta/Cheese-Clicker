@@ -15,6 +15,8 @@ public class SettingsMenu : MonoBehaviour
 
     public GameObject deleteUserPrompt;
 
+    public GameObject resetSavePrompt;
+
     public void OnScoresButtonPressed() {
         scoresMenu.SetActive(true);
         mainSettingsMenu.SetActive(false);
@@ -31,6 +33,10 @@ public class SettingsMenu : MonoBehaviour
         mainSettingsMenu.SetActive(true);
     }
 
+
+    public void ResetSaveData() {
+        resetSavePrompt.SetActive(true);
+    }
 
 
     public void CheckDeleteUserAccount() {

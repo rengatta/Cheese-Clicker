@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Threading.Tasks;
 using Firebase.Auth;
+using Firebase.Database;
 using Firebase.Extensions;
 using TMPro;
 using UnityEngine;
@@ -12,6 +13,7 @@ using UnityEngine.UI;
 public class SignUpHandler : MonoBehaviour
 {
     public SceneField signInScene;
+    public SceneField clickerScene;
     public TMP_InputField emailTextBox;
     public TMP_InputField passwordTextBox;
     public TMP_InputField confirmPasswordTextBox;
@@ -110,16 +112,45 @@ public class SignUpHandler : MonoBehaviour
         else if (task.IsCompleted)
         {
             Debug.Log(operation + " completed");
-           
-            SceneToSceneData.accountCreationSuccessful = true;
-            SceneToSceneData.newSignupUsername = usernameInputField.text;
 
+            SceneToSceneData.newSignupUsername = usernameInputField.text;
             passwordErrorText.text = "Account successfully created!.";
             loginAttemptComplete = true;
-            SceneManager.LoadScene(signInScene);
+
+            SignInAfterSignup();
         }
 
     }
+
+
+    void SignInAfterSignup() {
+        Debug.Log("Attempting to sign in");
+        GlobalHelper.global.auth.SignInWithEmailAndPasswordAsync(emailTextBox.text, passwordTextBox.text).ContinueWithOnMainThread(task2 => {
+            if (task2.IsCanceled)
+            {
+                Debug.Log("Error. Sign in canceled.");
+                SignInAfterSignup();
+            }
+            else if (task2.IsFaulted)
+            {
+                Debug.Log("Error. Sign in faulted.");
+                SignInAfterSignup();
+            }
+            else
+            {
+                
+                SceneToSceneData.canCloudSave = true;
+                GlobalHelper.global.userID = GlobalHelper.global.auth.CurrentUser.UserId;
+                SceneManager.LoadScene(clickerScene);
+
+            }
+
+
+        });
+
+
+    }
+
 
     void DisableUI()
     {

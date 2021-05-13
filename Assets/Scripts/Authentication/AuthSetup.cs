@@ -13,13 +13,14 @@ public class AuthSetup : MonoBehaviour
     // add them if possible.
     void Start()
     {
-        Debug.Log("START");
+        Debug.Log("Loading scene started.");
         Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
         {
             Debug.Log("Checking for dependencies.");
             dependencyStatus = task.Result;
             if (dependencyStatus == Firebase.DependencyStatus.Available)
             {
+                Debug.Log("Initializing Firebase.");
                 GlobalHelper.global.authManager.InitializeFirebase();
             }
             else
@@ -28,10 +29,22 @@ public class AuthSetup : MonoBehaviour
                   "Could not resolve all Firebase dependencies: " + dependencyStatus);
             }
         });
+
+
+
+    }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Escape)) {
+            Debug.Log("QUITTING");
+            Application.Quit();
+
+        }
     }
 
 
 
-    
+
 
 }
