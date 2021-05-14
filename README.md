@@ -3,7 +3,8 @@
 ![image](https://user-images.githubusercontent.com/53513566/118217284-fca0fd80-b429-11eb-8793-8f45fce50981.png)
 
 
-**Cheese Clicker** is a small idle-clicker game that serves to test out and experiment with Firebase's Unity Game Engine integration.  ![image](https://user-images.githubusercontent.com/53513566/118217444-55709600-b42a-11eb-8634-0350fb1d7baa.png)
+**Cheese Clicker** is a small idle-clicker game that serves to test out and experiment with Firebase's Unity Game Engine integration.    
+![image](https://user-images.githubusercontent.com/53513566/118217444-55709600-b42a-11eb-8634-0350fb1d7baa.png)
  
  Developed using **Unity 2020.1.3f1** and built for desktop and Android. This game was worked on over the course of 15 weeks for **CSE 4500 - Platform Computing.** 
  
